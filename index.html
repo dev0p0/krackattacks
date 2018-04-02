@@ -7,6 +7,9 @@
 	<meta name="description" content="This website presents the Key Reinstallation Attack (KRACK). It breaks the WPA2 protocol by forcing nonce reuse in encryption algorithms used by Wi-Fi." />
 	<link href="css/default.css" rel="stylesheet" type="text/css" media="all" />
 	
+	<link rel="shortcut icon" href="images/favicon.ico" type="image/x-icon">
+	<link rel="icon" href="images/favicon.ico" type="image/x-icon">
+	
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/modernizr.min.js"></script>
@@ -41,7 +44,7 @@
 	</div>
 	<div id="menu-wrapper">
 		<div id="main-nav" class="container">
-			<span class="custom-mobile-menu-title" style="display: none;">Nagivate page</span>
+			<span class="custom-mobile-menu-title" style="display: none;">Navigate page</span>
 			<ul class="menu">
 				<li class="page_item"><a href="#intro">Intro</a></li>
 				<li class="page_item"><a href="#demo">Demo</a></li>
@@ -88,6 +91,7 @@
 		</p>
 		<div class="demo-video">
 		<div class="demo-video-container">
+			<!-- <iframe width="853" height="480" src="https://player.vimeo.com/video/238827849" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe> -->
 			<iframe width="853" height="480" src="https://www.youtube-nocookie.com/embed/Oh4WURZoR98?rel=0&amp;showinfo=0&amp;vq=hd720" frameborder="0" allowfullscreen></iframe>
 		</div>
 		</div>
@@ -147,13 +151,13 @@
 			We base this judgement on two observations.
 			First, during our own research we found that most clients were affected by it.
 			Second, adversaries can use this attack to decrypt packets sent by clients, allowing them to intercept sensitive information such as passwords or cookies.
-			Decryption of packets is possible because a key reinstallation attack causes the transmit nonces (sometimes also called packet numbers or initialization vectors) to be reset to zero.
+			Decryption of packets is possible because a key reinstallation attack causes the transmit nonces (sometimes also called packet numbers or initialization vectors) to be reset to their initial value.
 			As a result, <strong>the same encryption key is used with nonce values that have already been used in the past</strong>.
 			In turn, this causes all encryption protocols of WPA2 to reuse <a href="https://en.wikipedia.org/wiki/Keystream">keystream</a> when encrypting packets.
 			In case a message that reuses keystream has known content, it becomes trivial to derive the used keystream.
 			This keystream can then be used to decrypt messages with the same nonce.
 			When there is no known content, it is harder to decrypt packets, although still possible in several cases (e.g. <a href="https://crypto.stackexchange.com/a/2250">English text can still be decrypted</a>).
-			<!-- TODO: We can mention encrypted message 4's are usefull for this? -->
+			<!-- TODO: We can mention encrypted message 4's are useful for this? -->
 			In practice, finding packets with known content is not a problem, so it should be assumed that any packet can be decrypted.
 			</p>
 			
@@ -185,7 +189,7 @@
 			Because Android uses wpa_supplicant, Android 6.0 and above also contains this vulnerability.
 			This makes it <strong>trivial to intercept and manipulate traffic sent by these Linux and Android devices</strong>.
 			<!-- TODO: Should double-check that carries don't mess with the wpa_supplicant version... -->
-			Note that currently <a href="https://developer.android.com/about/dashboards/index.html">41% of Android devices</a> are vulnerable to this exceptionally devastating variant of our attack.</p>
+			Note that currently <a href="https://developer.android.com/about/dashboards/index.html">50% of Android devices</a> are vulnerable to this exceptionally devastating variant of our attack.</p>
 		
 			<h3>Assigned CVE identifiers</h3>
 			<p>The following Common Vulnerabilities and Exposures (CVE) identifiers were assigned to track which products are affected by specific instantiations of our key reinstallation attack:</p>
@@ -232,57 +236,165 @@
 		<h3>Addendum: other vulnerable handshakes</h3>
 		<p>After our initial research as reported in the paper, we discovered that the TDLS handshake and WNM Sleep Mode Response frame are also vulnerable to key reinstallation attacks.</p>
 		
+		<a name="errata"></a>
 		<h3>Selected errata</h3>
 		<ul>
-			<li>In Figure 9 at stage 3 of the attack, the frame transmitted from the adversary to the authenticator should say a ReassoReq instead of ReassoResp.</li>
+			<li>In Figure 9 at stage 3 of the attack, the frame transmitted from the adversary to the authenticator should say "ReassoReq(ANonce, SNonce, MIC)" instead of "ReassoResp(..)".</li>
+			<li>Section 3.1: figure 3 contains a simplified description of the state machine (not figure 2).</li>
+			<li>Section 4.2: "It is essential that the broadcast frame we replay is sent <strong>after</strong> (not before) the retransmission of group message 1". A similar change should be made in Section 4.3: "Again it is essential that the broadcast frame we want to replay is sent <strong>after</strong> (not before) the retransmission of group message 1".</li>
 		</ul>
 
+		<a name="citeme"></a>
+		<h3>Citation example and bibtex entry</h3>
+		<p>Please cite our research paper and not this website (or cite both). You can use the following example citation or bibtex entry:</p>
+		<div class="indent">
+			<p>Mathy Vanhoef and Frank Piessens. 2017. Key Reinstallation Attacks: Forcing Nonce Reuse in WPA2. In Proceedings of the 24th ACM Conference on Computer and Communications Security (CCS). ACM.</p>
+			<pre class="code">@inproceedings{vanhoef-ccs2017,
+  author        = {Mathy Vanhoef and Frank Piessens},
+  title         = {Key Reinstallation Attacks: Forcing Nonce Reuse in {WPA2}},
+  booktitle     = {Proceedings of the 24th ACM Conference on Computer and Communications Security (CCS)},
+  year          = {2017},
+  publisher     = {ACM}
+}</pre>
+		</div>
 		
 		<!-------------------- Tools -------------------->
 			
 		<a name="tools"></a>
 		<h2>Tools</h2>
 		<p>We have made scripts to detect whether an implementation of the 4-way handshake, group key handshake, or Fast BSS Transition (FT) handshake is vulnerable to key reinstallation attacks.
-		These scripts will be released once we had the time to clean up their usage instructions.</p>
+		<a href="https://github.com/vanhoefm/krackattacks-scripts">These scripts are available on github</a>, and contain detailed instructions on how to use them.
+		</p>
 		<p>We also made a proof-of-concept script that exploits the all-zero key (re)installation present in certain Android and Linux devices.
 		This script is the one that we used in the <a href="#demo">demonstration video</a>.
-		It will be released once everyone had a reasonable chance to update their devices (and we have had a chance to prepare the code repository for release).
+		It will be released once everyone has had a reasonable chance to update their devices (and we have had a chance to prepare the code repository for release).
 		We remark that the reliability of our proof-of-concept script may depend on how close the victim is to the real network.
-		If the victim is very close to the real network, the script may fail because the victim will always directly communicate with the real network, even if the victim is (forced) on a different Wi-Fi channel than this network.
+		If the victim is very close to the real network, the script may fail because the victim will always directly communicate with the real network, even if the victim is (forced) onto a different Wi-Fi channel than this network.
 		</p>	
 		
 		<!-------------------- Q&A -------------------->
-			
+
+		<!--
+			- Is there an advantage in hiding the SSID of my network?
+			- Does the attacker need to be part of the network?
+		-->
+
 		<a name="faq" ></a>
 		<h2>Q&amp;A</h2>
-			<h3 class="firsttitle">Do we now need WPA3?</h3>
-			<p>No, luckily <strong>implementations can be patched in a backwards-compatible manner</strong>. This means a patched client can still communicate with an unpatched access point, and vice versa. In other words, a patched client or access points sends exactly the same handshake messages as before, and at exactly the same moments in time. However, the security updates will assure a key is only installed once, preventing our attacks. So again, update all your devices once security updates are available.</p>
+
+			<ul>
+				<li><a href="#wpa3">Do we now need WPA3?</a></li>
+				<li><a href="#changepw">Should I change my Wi-Fi password?</a></li>
+				<li><a href="#onlyaes">I'm using WPA2 with only AES. That's also vulnerable?</a></li>
+				<li><a href="#authors">You use the word "we" in this website. Who is we?</a></li>
+				<li><a href="#amivulnerable">Is my device vulnerable?</a></li>
+				<li><a href="#norouterupdates">What if there are no security updates for my router or access point? Or if it does not support 802.11r?</a></li>
+				<li><a href="#patch-client-and-ap">Is it sufficient to patch only the access point? Or to patch only clients?</a></li>
+				<li><a href="#ap-mitigations">Can we modify an access point to prevent attacks against the client?</a></li>
+				<li><a href="#howdiscovered">How did you discover these vulnerabilities?</a></li>
+				<li><a href="#securityproof">The 4-way handshake was mathematically proven as secure. How is your attack  possible?</a></li>
+				<li><a href="#attackarehard">Some attacks in the paper seem hard</a></li>
+				<li><a href="#channelmitm">If an attacker can do a man-in-the-middle attack, why can't they just decrypt all the data?</a></li>
+				<li><a href="#proximity">Does an attacker to have be near your network in order to attack it?</a></li>
+				<li><a href="#isitexploited">Are people exploiting this in the wild?</a></li>
+				<li><a href="#dontusewep">Should I temporarily use WEP until my devices are patched?</a></li>
+				<li><a href="#wifistandard">Will the Wi-Fi standard be updated to address this?</a></li>
+				<li><a href="#wifialliance">Is the Wi-Fi Alliance also addressing these vulnerabilities?</a></li>
+				<li><a href="#matchdotcom">Why did you use match.com as an example in the demonstration video?</a></li>
+				<li><a href="#preventthesebugs">How can these types of bugs be prevented?</a></li>
+				<li><a href="#whythename">Why the domain name krackattacks.com?</a></li>
+				<li><a href="#bugbounties">Did you get bug bounties for this?</a></li>
+				<li><a href="#relatedwork">How does this attack compare to other attacks against WPA2?</a></li>
+				<li><a href="#otherprotocols">Are other protocols also affected by key reinstallation attacks?</a></li>
+				<li><a href="#highreslogo">Is there a higher resolution version of the logo?</a></li>
+				<li><a href="#disclosure">When did you first notify vendors about the vulnerability?</a></li>
+				<li><a href="#openbsd">Why did OpenBSD silently release a patch before the embargo?</a></li>
+				<li><a href="#morevuln">So you expect to find other Wi-Fi vulnerabilities?</a></li>
+				<li><a href="#moreinfo">Where can I learn more about key reinstallation attacks?</a></li>
+			</ul>
+
+			<a name="wpa3" ></a>
+			<h3>Do we now need WPA3?</h3>
+			<p>No, luckily <strong>implementations can be patched in a backwards-compatible manner</strong>.
+			This means a patched client can still communicate with an unpatched access point (AP), and vice versa.
+			In other words, a patched client or access point sends exactly the same handshake messages as before, and at exactly the same moment in time.
+			However, the security updates will assure a key is only installed once, preventing our attack.
+			So again, update all your devices once security updates are available.
+			Finally, although an unpatched client can still connect to a patched AP, and vice versa, <em>both</em> the client and AP must be patched to defend against all attacks!</p>
 			
 			<a name="changepw" ></a>
 			<h3>Should I change my Wi-Fi password?</h3>
-			<p>Changing the password of your Wi-Fi network does not prevent (or mitigate) the attack. So you do not have to update the password of your Wi-Fi network. Instead, you should make sure all your devices are updated, and you should also update the firmware of your router. After updating your router, you can <i>optionally</i> change the Wi-Fi password as an extra precaution.</p>
+			<p>Changing the password of your Wi-Fi network does not prevent (or mitigate) the attack. So you do not have to update the password of your Wi-Fi network. Instead, you should make sure all your devices are updated, and you should also update the firmware of your router. Nevertheless, after updating both your client devices and your router, it's never a bad idea to change the Wi-Fi password.</p>
 			
+			<a name="onlyaes" ></a>
 			<h3>I'm using WPA2 with only AES. That's also vulnerable?</h3>
 			<p>Yes, that network configuration is also vulnerable. The attack works against both WPA1 and WPA2, against personal and enterprise networks, and against any cipher suite being used (WPA-TKIP, AES-CCMP, and GCMP). So everyone should update their devices to prevent the attack!</p>
 			
+			<a name="authors" ></a>
 			<h3>You use the word "we" in this website. Who is we?</h3>
 			<p>I use the word "we" because that's what I'm used to writing in papers. In practice, all the work is done by me, with me being Mathy Vanhoef.
 			My awesome supervisor is added under an <a href="https://en.wikipedia.org/wiki/Academic_authorship#Honorary_authorship">honorary authorship</a> to the research paper for his excellent general guidance.
 			But all the real work was done on my own. 
 			So the <a href="http://phdcomics.com/comics.php?f=562">author list</a> of academic papers does not represent <a href="https://imgur.com/a/mKnnu">division of work</a> :)</p>
 			
+			<a name="amivulnerable" ></a>
 			<h3>Is my device vulnerable?</h3>
-			<p>Probably. Any device that uses Wi-Fi is likely vulnerable. Contact your vendor for more information.</p>
+			<p>Probably. Any device that uses Wi-Fi is likely vulnerable. Contact your vendor for more information, or consult <a href="https://github.com/kristate/krackinfo">this community maintained list on GitHub</a>.</p>
 			
-			<h3>What if there are no security updates for my router?</h3>
-			<!-- Note: there might be implementations bugs where replay of msg4/4 causes a key reinstallation attack -->
-			<p>Our main attack is against the 4-way handshake, and does not exploit access points, but instead targets clients. So it might be that your router does not require security updates. We strongly advise you to contact your vendor for more details. In general though, you can try to mitigate attacks against routers and access points by disabling client functionality (which is for example used in repeater modes) and disabling 802.11r (fast roaming). For ordinary home users, your priority should be updating clients such as laptops and smartphones.</p>
-			
+			<a name="norouterupdates" ></a>
+			<h3>What if there are no security updates for my router or access point? Or if it does not support 802.11r?</h3>
+			<p>
+			Routers or access points (APs) are only vulnerable to our attack if they support the Fast BSS Transition (FT) handshake, or if they support client (repeater) functionality.
+			First, the FT handshake is part of 802.11r, and is mainly supported by enterprise networks, and not by home routers or APs.
+			Additionally, most home routers or APs do not support (or will not use) client functionality.
+			In other words, your home router or AP likely does not require security updates.
+			Instead, it are mainly enterprise networks that will have to update their network infrastructure (i.e. their routers and access points).</p>
+			<!-- Note: there might also be other implementations bugs where replay of msg4/4 causes a key reinstallation attack -->
+			<p>That said, some vendors discovered implementation-specific security issues while investigating our attack.
+			For example, it was discovered that <a href="https://w1.fi/security/2017-1/wpa-packet-number-reuse-with-replayed-messages.txt">hostapd reuses the ANonce value</a> in the 4-way handshake during rekeys.
+			Concretely this means that, even if your router or AP does not support 802.11r, and even if it does not support client functionality, it might still have to be updated.
+			Contact your vendor for more details.
+			</p>
+			<p>Finally, we remark that you can try to mitigate attacks against routers and APs by disabling client functionality (which is for example used in repeater modes) and disabling 802.11r (fast roaming).
+			Additionally, update all your other client devices such as laptops and smartphones.
+			If one or more of your client devices is not receiving updates, you can also try to contact your router's vendor and ask if they have an <a href="#ap-mitigations">update that prevents attacks against connected devices</a>.</p>
+
+			<a name="patch-client-and-ap"></a>
+			<h3>Is it sufficient to patch only the access point? Or to patch only clients?</h3>
+			<p>Currently, all vulnerable devices should be patched.
+			In other words, patching the AP will not prevent attacks against vulnerable clients.
+			Similarly, patching all clients will not prevent attacks against vulnerable access points.
+			Note that only access points that support the Fast BSS Transition handshake (802.11r) can be vulnerable.</p>
+			<p>
+			That said, it is possible to <a href="#ap-mitigations">modify the access point such that vulnerable clients (when connected to this AP) cannot be attacked</a>.
+			However, these modifications are different from the normal security patches that are being released for vulnerable access points!
+			So unless your access point vendor explicitly mentions that their patches prevent attacks against clients, you must also patch clients.</p>
+
+			<a name="ap-mitigations"></a>
+			<h3>Can we modify an access point to prevent attacks against the client?</h3>
+			<!-- TODO: Investigate WNM Sleep Mode Response frames in more detail, especially in combination with the group key handshake -->
+			<p>It's possible to modify the access point (router) such that connected clients are not vulnerable to attacks against the 4-way handshake and group key handshake.
+			Note that we consider these two attacks the most serious and widespread security issues we discovered.
+			However, these modifications only prevent attacks when a vulnerable client is connected to such a modified access point.
+			When a vulnerable client connects to a different access point, it can still be attacked.</p>
+			<p>Technically, this is accomplished by modifying the access point such that it does not retransmit message 3 of the 4-way handshake.
+			Additionally, the access point is modified to not retransmit message 1 of the group key handshake.
+			The <a href="https://w1.fi/cgit/hostap/commit/?id=6f234c1e2ee1ede29f2412b7012b3345ed8e52d3">hostapd project has such a modification available</a>.
+			They are currently evaluating to which extend this impacts the reliability of these handshakes.
+			We remark that the client-side attacks against the 4-way handshake and group key handshake can also be prevented by retransmitting the above handshake messages using the same (previous) EAPOL-Key replay counter.
+			The attack against the group key handshake can also be prevented by letting the access point install the group key in a delayed fashion, and by assuring the access point only accepts the latest replay counter (see <a href="#paper">section 4.3 of the paper</a> for details).
+			</p>
+			<p>On some products, variants or generalizations of the above mitigations can be enabled without having to update products.
+			<!-- TODO: Link to a more general overview of products instead of only mentioning one -->
+			For example, on some access points retransmissions of all handshake messages can be disabled, preventing client-side attacks against the 4-way and group key handshake (<a href="https://tools.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-20171016-wpa#workarounds">see for example Cisco</a>).</p>
+
+			<a name="howdiscovered" ></a>
 			<h3>How did you discover these vulnerabilities?</h3>
 			<p>When working on the final (i.e. camera-ready) version of <a href="https://lirias.kuleuven.be/bitstream/123456789/572634/1/asiaccs2017.pdf">another paper</a>, I was double-checking some claims we made regarding OpenBSD's implementation of the 4-way handshake. In a sense I was slacking off, because I was supposed to be just finishing the paper, instead of staring at code. But there I was, inspecting some code I already read a hundred times, to avoid having to work on the next paragraph. It was at that time that a particular call to <a href="https://github.com/openbsd/src/blob/ca7fda7e2ae9fcf15b882d71bc910143e6b0d09b/sys/net80211/ieee80211_pae_input.c#L519">ic_set_key</a> caught my attention. This function is called when processing message 3 of the 4-way handshake, and it installs the pairwise key to the driver. While staring at that line of code I thought <i>&ldquo;Ha. I wonder what happens if that function is called twice&rdquo;</i>. At the time I (correctly) guessed that calling it twice might reset the nonces associated to the key. And since message 3 can be retransmitted by the Access Point, in practice it might indeed be called twice. <i>&ldquo;Better make a note of that. Other vendors might also call such a function twice. But let's first finish this paper...&rdquo;</i>. A few weeks later, after finishing the paper and completing some other work, I investigated this new idea in more detail. And the rest is history.</p>
 			
+			<a name="securityproof" ></a>
 			<h3>The 4-way handshake was mathematically proven as secure. How is your attack  possible?</h3>
-			<p>The brief answer is that the formal proof does not assure a key is installed once. Instead, it only assures the negotiated key remains secret, and that handshake messages cannot be forged.</p>
+			<p>The brief answer is that the formal proof does not assure a key is installed only once. Instead, it merely assures the negotiated key remains secret, and that handshake messages cannot be forged.</p>
 			<p>The longer answer is mentioned in <a href="#paper">the introduction of our research paper</a>: our attacks do not violate the security properties proven in formal analysis of the 4-way handshake.
 			In particular, these proofs state that the negotiated encryption key remains private, and that the identity of both the client and Access Point (AP) is confirmed.
 			Our attacks do not leak the encryption key.
@@ -292,29 +404,45 @@
 			Put differently, the formal models did not define when a negotiated key should be installed.
 			In practice, this means the same key can be installed multiple times, thereby resetting nonces and replay counters used by the encryption protocol (e.g. by WPA-TKIP or AES-CCMP).</p>
 
-			<h3>Some attacks in paper seem hard</h3>
-			<p>We have follow-up work making our attacks (against for example macOS and OpenBSD) significantly more general and easier to execute.
+			<a name="attackarehard" ></a>
+			<h3>Some attacks in the paper seem hard</h3>
+			<p>We have follow-up work making our attacks (against macOS and OpenBSD for example) significantly more general and easier to execute.
 			So although we agree that some of the attack scenarios in the paper are rather impractical, do not let this fool you into believing key reinstallation attacks cannot be abused in practice.</p>
 
-			<h3>If an attacker can do a man-in-the-middle attack, why can't he just decrypt all the data?</h3>
+			<a name="channelmitm" ></a>
+			<h3>If an attacker can do a man-in-the-middle attack, why can't they just decrypt all the data?</h3>
 			<p>As mentioned in the demonstration, the attacker first obtains a man-in-the-middle (MitM) position between the victim and the real Wi-Fi network (called a <a href="https://lirias.kuleuven.be/bitstream/123456789/473761/1/acsac2014.pdf">channel-based MitM position</a>).
 			However, this MitM position does not enable the attacker to decrypt packets!
 			This position only allows the attacker to reliably delay, block, or replay <em>encrypted</em> packets.
-			So at this point in the attack, he or she cannot yet decrypt packets.
+			So at this point in the attack, they cannot yet decrypt packets.
 			Instead, the ability to reliably delay and block packets is used to execute a key reinstallation attack.
-			After performing a key reinstallation attacks, packets can be decrypted.</p>
+			After performing a key reinstallation attack, packets can be decrypted.</p>
 
+			<a name="proximity" ></a>
+			<h3>Does an attacker to have be near your network in order to attack it?</h3>
+			<p>An adversary has to be within range of both the client being attacked (meaning the smartphone or laptop) and the network itself.
+			This means an adversary on the other side of the world cannot attack you remotely.
+			However, the attacker can still be relatively far way.
+			That's because special antenna can be used to carry out the attack from <a href="https://www.mattparkinson.eu/designer-cantenna/">two miles</a> to up to <a href="https://leaksource.files.wordpress.com/2013/12/nsa-ant-nightstand.jpg?w=604&h=781">eight miles</a> in ideal conditions.
+			Additionally, the attacker is not competing with the signal strength of the real Wi-Fi network, but instead uses so-called Channel Switch Announcements to manipulate and attack the client.
+			As a result, it is possible to successfully carry out attacks even when far away from the victim.
+			</p>
+
+			<a name="isitexploited" ></a>
 			<h3>Are people exploiting this in the wild?</h3>
 			<p>We are not in a position to determine if this vulnerability has been (or is being) actively exploited in the wild. That said, key reinstallations can actually occur spontaneously without an adversary being present! This may for example happen if the last message of a handshake is lost due to background noise, causing a retransmission of the previous message. When processing this retransmitted message, keys may be reinstalled, resulting in nonce reuse just like in a real attack.</p>
 
+			<a name="dontusewep" ></a>
 			<h3>Should I temporarily use WEP until my devices are patched?</h3>
 			<p><strong>NO!</strong> Keep using WPA2.</p>
 
+			<a name="wifistandard" ></a>
 			<h3>Will the Wi-Fi standard be updated to address this?</h3>
 			<p>There seems to be an agreement that the Wi-Fi standard should be updated to explicitly prevent our attacks.
 			These updates likely will be backwards-compatible with older implementations of WPA2.
 			Time will tell whether and how the standard will be updated.</p>
 
+			<a name="wifialliance" ></a>
 			<h3>Is the Wi-Fi Alliance also addressing these vulnerabilities?</h3>
 			<p>For those unfamiliar with Wi-Fi, the <a href="https://en.wikipedia.org/wiki/Wi-Fi_Alliance">Wi-Fi Alliance</a> is an organization which certifies that Wi-Fi devices conform to certain standards of interoperability. Among other things, this assures that Wi-Fi products from different vendors work well together.</p>
 			<p><a href="https://www.wi-fi.org/securityupdate2017">The Wi-Fi Alliance has a plan</a> to help remedy the discovered vulnerabilities in WPA2. Summarized, they will:</p>
@@ -325,37 +453,73 @@
 				<li>Communicate the importance for users to ensure they have installed the latest recommended security updates from device manufacturers.</li>
 			</ul>
 			
-			
+			<a name="matchdotcom" ></a>
 			<h3>Why did you use match.com as an example in the demonstration video?</h3>
 			<p>Users share a lot of personal information on websites such as match.com. So this example highlights all the sensitive information an attacker can obtain, and hopefully with this example people also better realize the potential (personal) impact. We also hope this example makes people aware of <a href="https://www.theguardian.com/technology/2017/sep/26/tinder-personal-data-dating-app-messages-hacked-sold">all the information these dating websites may be collecting</a>.</p>
 
+			<a name="preventthesebugs" ></a>
 			<h3>How can these types of bugs be prevented?</h3>
 			<p>We need more rigorous inspections of protocol implementations. This requires help and additional research from the academic community! Together with other researchers, we hope to organize workshop(s) to improve and verify the correctness of security protocol implementations.</p>
 
+			<a name="whythename" ></a>
 			<h3>Why the domain name krackattacks.com?</h3>
 			<p>First, I'm aware that KRACK attacks is a <a href="https://en.wikipedia.org/wiki/Pleonasm">pleonasm</a>, since KRACK stands for <u>k</u>ey <u>r</u>einstallation <u>a</u>tta<u>ck</u> and hence already contains the word attack. But the domain name rhymes, so that's why it's used.</p>
 
+			<a name="bugbounties" ></a>
 			<h3>Did you get bug bounties for this?</h3>
-			<p>I haven't applied for any bug bounties yet, nor have I received one already.</p>
+			<p>Hackerone has awarded a bug bounty for our research under their Internet Bug Bounty (IBB) award program.</p>
 
+			<a name="relatedwork" ></a>
 			<h3>How does this attack compare to other attacks against WPA2?</h3>
 			<p>This is the first attack against the WPA2 protocol that doesn't rely on password guessing. Indeed, other attacks against WPA2-enabled network are against surrounding technologies such as <a href="http://archive.hack.lu/2014/Hacklu2014_offline_bruteforce_attack_on_wps.pdf">Wi-Fi Protected Setup (WPS)</a>, or are attacks against older standards such as <a href="https://lirias.kuleuven.be/bitstream/123456789/401042/1/wpatkip.pdf">WPA-TKIP</a>. Put differently, none of the existing attacks were against the 4-way handshake or against cipher suites defined in the WPA2 protocol. In contrast, our key reinstallation attack against the 4-way handshake (and against other handshakes) highlights vulnerabilities in the WPA2 protocol itself.</p>
 
+			<a name="otherprotocols" ></a>
 			<h3>Are other protocols also affected by key reinstallation attacks?</h3>
 			<p>We expect that certain <em>implementations of other protocols</em> may be vulnerable to similar attacks. So it's a good idea to audit security protocol implementations with this attack in mind. However, we consider it unlikely that other <em>protocol standards</em> are affected by similar attacks (or at least so we hope). Nevertheless, it's still a good idea to audit other protocols!</p>
 			
-			<h3>Is there is higher resolution version of the logo?</h3>
+			<a name="highreslogo" ></a>
+			<h3>Is there a higher resolution version of the logo?</h3>
 			<p><a href="images/logo.png">Yes there is</a>. And a big thank you goes to the person that made the logo!</p>
 
+			<a name="disclosure" ></a>
 			<h3>When did you first notify vendors about the vulnerability?</h3>
 			<p>We sent out notifications to vendors whose products we tested ourselves around 14 July 2017. After communicating with these vendors, we realized how widespread the weaknesses we discovered are (only then did I <em>truly</em> convince myself it was indeed a protocol weaknesses and not a set of implementation bugs). At that point, we decided to let <a href="https://cert.org/">CERT/CC</a> help with the disclosure of the vulnerabilities. In turn, CERT/CC sent out a broad notification to vendors on 28 August 2017.</p>
-			
+
+			<a name="openbsd" ></a>
 			<h3>Why did OpenBSD silently release a patch before the embargo?</h3>
-			<p>OpenBSD was notified of the vulnerability on 15 July 2017, before CERT/CC was involved in the coordination. Quite quickly, Theo de Raadt replied and critiqued the tentative disclosure deadline: <i>&ldquo;In the open source world, if a person writes a diff and has to sit on it for a month, that is very discouraging&rdquo;</i>. Note that I wrote and included a suggested diff for OpenBSD already, and that at the time the tentative disclosure deadline was around the end of August. As a compromise, I allowed them to silently patch the vulnerability. In hindsight this was a bad decision, since others might rediscover the vulnerability by inspecting their silent patch. To avoid this problem in the future, OpenBSD will now receive vulnerability notifications closer to the end of an embargo.</p>
-			
+			<p>OpenBSD <a href="https://marc.info/?l=openbsd-announce&m=150410604407872&w=2">announced an errata on 30 August 2017</a> that silently prevented our key reinstallation attacks.
+			More specifically, patches were released for both <a href="https://ftp.openbsd.org/pub/OpenBSD/patches/6.0/common/041_net80211_replay.patch.sig">OpenBSD 6.0</a> and <a href="https://ftp.openbsd.org/pub/OpenBSD/patches/6.1/common/027_net80211_replay.patch.sig">OpenBSD 6.1</a>.</p>
+			<p>We notified OpenBSD of the vulnerability on 15 July 2017, before CERT/CC was involved in the coordination. Quite quickly, Theo de Raadt replied and critiqued the tentative disclosure deadline: <i>&ldquo;In the open source world, if a person writes a diff and has to sit on it for a month, that is very discouraging&rdquo;</i>. Note that I wrote and included a suggested diff for OpenBSD already, and that at the time the tentative disclosure deadline was around the end of August. As a compromise, I allowed them to silently patch the vulnerability. In hindsight this was a bad decision, since others might rediscover the vulnerability by inspecting their silent patch. To avoid this problem in the future, OpenBSD will now receive vulnerability notifications closer to the end of an embargo.</p>
+
+			<a name="morevuln" ></a>
 			<h3>So you expect to find other Wi-Fi vulnerabilities?</h3>
 			<p><i>&ldquo;I think we're just getting started.&rdquo;</i> &nbsp;&mdash; Master Chief, Halo 1</p>
-		
+
+			<a name="moreinfo" ></a>
+			<h3>Where can I learn more about key reinstallation attacks?</h3>
+			<p>Good technical information and comments:</p>
+			<ul>
+				<li><a href="https://www.youtube.com/watch?v=fOgJswt7nAc">LiveOverflow has an excellent video explaining the attack</a></li>
+				<li><a href="https://www.youtube.com/watch?v=mYtvjijATa4">Computerphile also made a video about the attack</a></li>
+				<li><a href="https://blog.cryptographyengineering.com/2017/10/16/falling-through-the-kracks/">Matthew Green has a good blog post about KRACK and the causes of the vulnerability</a></li>
+				<li><a href="https://blog.mojonetworks.com/wpa2-vulnerability">Mojo Networks has a detailed blog posts on the attacks</a></li>
+				<li><a href="https://www.schneier.com/blog/archives/2017/10/new_krack_attac.html">Bruce Schneier also briefly discusses the attack</a></li>
+			</ul>
+			<p>Selected newspapers with high-level information:</p>
+			<ul>
+				<li><a href="http://www.bbc.com/news/technology-41635516">The BCC made a short video explaining the attack, and wrote an article about it</a></li>
+				<li><a href="https://outline.com/MHm5yw">The Wall Street Journal: Significant Flaw Discovered in Wi-Fi Security Protocol</a></li>
+				<li><a href="https://www.theguardian.com/technology/2017/oct/16/wpa2-wifi-security-vulnerable-hacking-us-government-warns">The Guardian: 'All wifi networks' are vulnerable to hacking, security expert discovers</a></li>
+				<li><a href="http://time.com/4983720/krack-attack-wpa2-wifi/">TIME: Everything With Wi-Fi Has a Newly Discovered Security Flaw. Here's How to Protect Yourself</a></li>
+				<li><a href="https://arstechnica.com/information-technology/2017/10/severe-flaw-in-wpa2-protocol-leaves-wi-fi-traffic-open-to-eavesdropping/">Ars Technica: Serious flaw in WPA2 protocol lets attackers intercept passwords and much more</a></li>
+				<li><a href="https://arstechnica.com/information-technology/2017/10/how-the-krack-attack-destroys-nearly-all-wi-fi-security/">Ars Technica: How the KRACK attack destroys nearly all Wi-Fi security</a></li>
+				<li><a href="https://www.theverge.com/2017/10/16/16481136/wpa2-wi-fi-krack-vulnerability">The Verge: Wi-Fi security has been breached, say researchers</a></li>
+				<li><a href="https://www.theverge.com/2017/10/16/16481252/wi-fi-hack-attack-android-wpa-2-details">The Verge: 41 percent of Android phones are vulnerable to 'devastating' Wi-Fi attack</a></li>
+				<li><a href="https://uk.reuters.com/article/us-cyber-wifi-flaw/researchers-uncover-flaw-that-makes-wi-fi-vulnerable-to-hacks-idUKKBN1CL1UE">Reuters: Researchers uncover flaw that makes Wi-Fi vulnerable to hacks</a></li>
+				<li><a href="https://www.forbes.com/sites/thomasbrewster/2017/10/16/krack-attack-breaks-wifi-encryption/#5f734a282ba9">Forbes: Update Every Device -- This KRACK Hack Kills Your Wi-Fi Privacy</a></li>
+				<li><a href="https://www.cnet.com/news/krack-wi-fi-attack-patch-how-microsoft-apple-google-responding/">CNET: KRACK attack: Here's how companies are responding</a></li>
+			</ul>
+
 		<!-------------------- END OF MAIN CONTENT -------------------->
 <div type="margin: 0px auto;">            
 </div>
